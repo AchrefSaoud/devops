@@ -1,8 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9-openjdk-17-slim'
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
     
     environment {
-        MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository'
+        MAVEN_OPTS = '-Dmaven.repo.local=/root/.m2/repository'
     }
     
     stages {
@@ -16,26 +21,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                script {
-                    if (isUnix()) {
-                        sh './mvnw clean compile'
-                    } else {
-                        bat '.\\mvnw.cmd clean compile'
-                    }
-                }
+                sh 'mvn clean compile'
             }
         }
         
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                script {
-                    if (isUnix()) {
-                        sh './mvnw test'
-                    } else {
-                        bat '.\\mvnw.cmd test'
-                    }
-                }
+                sh 'mvn test'
             }
             post {
                 always {
@@ -47,13 +40,7 @@ pipeline {
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
-                script {
-                    if (isUnix()) {
-                        sh './mvnw package -DskipTests'
-                    } else {
-                        bat '.\\mvnw.cmd package -DskipTests'
-                    }
-                }
+                sh 'mvn package -DskipTests'
             }
             post {
                 success {
@@ -65,13 +52,7 @@ pipeline {
         stage('Code Quality Analysis') {
             steps {
                 echo 'Running code quality checks...'
-                script {
-                    if (isUnix()) {
-                        sh './mvnw verify'
-                    } else {
-                        bat '.\\mvnw.cmd verify'
-                    }
-                }
+                sh 'mvn verify'
             }
         }
         
@@ -82,15 +63,8 @@ pipeline {
             steps {
                 echo 'Deploying to staging environment...'
                 script {
-                    // Here you would typically deploy to your staging environment
-                    // For demo purposes, we'll just echo
-                    if (isUnix()) {
-                        sh 'echo "Deploying application to staging..."'
-                        sh 'ls -la target/*.jar'
-                    } else {
-                        bat 'echo "Deploying application to staging..."'
-                        bat 'dir target\\*.jar'
-                    }
+                    sh 'echo "Deploying application to staging..."'
+                    sh 'ls -la target/*.jar'
                 }
             }
         }
