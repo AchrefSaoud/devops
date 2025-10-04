@@ -1,0 +1,3 @@
+Jenkins credentiel:
+username :admin
+password :aa4a555a371a493980f8802252d2ef4e
