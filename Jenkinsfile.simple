@@ -6,15 +6,17 @@ pipeline {
     }
     
     stages {
-        stage('Checkout') {
+        stage('Setup') {
             steps {
-                echo 'Checking out source code...'
+                echo 'Setting up build environment...'
                 script {
-                    try {
-                        checkout scm
-                    } catch (Exception e) {
-                        echo 'SCM checkout not available - using workspace content'
-                        echo 'This is normal for Pipeline jobs without SCM configuration'
+                    // Check if we're in a Git repository
+                    if (isUnix()) {
+                        sh 'pwd'
+                        sh 'ls -la'
+                    } else {
+                        bat 'cd'
+                        bat 'dir'
                     }
                 }
             }
